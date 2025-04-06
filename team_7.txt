@@ -1,0 +1,84 @@
+• Fish Classification & Regression Project
+
+→ 1. Classification Models Implemented:
+
+• Random Forest:
+• Accuracy: 0.936
+• Precision, Recall, F1-score: High (especially across most classes)
+• Why Good: High accuracy and strong performance across all species. Handles non-linear data well.
+• Why Bad: Can be computationally intensive and less interpretable.
+
+• K-Nearest Neighbors (KNN):
+• Accuracy: 0.930
+• Precision, Recall, F1-score: Very good, but slightly affected by class imbalance.
+• Why Good: Simple, effective for small datasets, no training time.
+• Why Bad: Slow during prediction, affected by noisy data.
+
+• Support Vector Machine (SVM):
+• Accuracy: 0.875
+• Precision, Recall, F1-score: Moderate, especially low for minority classes.
+• Why Good: Good for high-dimensional data, strong theoretical foundation.
+• Why Bad: Lower accuracy here, sensitive to parameter tuning, not ideal for large datasets.
+
+• Logistic Regression:
+• Accuracy: 0.916
+• Precision, Recall, F1-score: Good, especially when data is well-distributed.
+• Why Good: Fast, easy to implement, interpretable.
+• Why Bad: Assumes linear boundaries, underperforms with complex relationships.
+
+• Decision Tree:
+• Accuracy: 0.925
+• Precision, Recall, F1-score: High, but risk of overfitting certain classes.
+• Why Good: Easy to interpret, no need for feature scaling.
+• Why Bad: Prone to overfitting, less stable.
+
+• Naive Bayes:
+• Accuracy: 0.928
+• Precision, Recall, F1-score: Balanced, but affected by feature assumptions.
+• Why Good: Fast, handles high-dimensional input well.
+• Why Bad: Strong independence assumption between features, which might not hold here.
+
+• Neural Network (MLP Classifier):
+• Accuracy: 0.933
+• Precision, Recall, F1-score: Very high, well-balanced across classes.
+• Why Good: Can model complex relationships, high accuracy.
+• Why Bad: Requires more data and time to train, harder to interpret.
+
+
+Best Model: Random Forest — highest accuracy, stable performance
+We tested 6 classifiers and selected Random Forest as the best-performing model for fish species classification.
+
+
+→ 2. Regression Models Implemented:
+
+• Linear Regression:
+• RMSE: 0.4259
+• R² Score: 0.8219
+• Why Good: Simple, interpretable.
+• Why Bad: Doesn’t capture non-linear relationships well.
+
+• Polynomial Regression:
+• RMSE: 1.5401757945667074e-15
+• R² Score: 1.0
+• Why Good: Captures non-linear relationships perfectly in our dataset.
+• Why Bad: Risk of overfitting, may not generalize well.
+
+• Neural Network Regression:
+• RMSE: 0.0422
+• R² Score: 0.9982
+• Why Good: Very high performance, handles complex data.
+• Why Bad: Requires tuning, more difficult to explain.
+
+→ 3. Exploratory Data Analysis (EDA):
+• Checked distributions of length, weight, and W/L ratio.
+• Used scatter plots to visualize length vs. weight.
+• Plotted boxplots and histograms for species-specific distributions.
+• Observed a strong correlation between length and weight.
+• Confirmed W/L ratio was slightly redundant.
+
+→ 4. Evaluation Metrics Used:
+• Accuracy, Precision, Recall, F1-score
+• Confusion Matrix
+• RMSE (Root Mean Square Error)
+• R² Score
+
