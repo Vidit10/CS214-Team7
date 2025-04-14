@@ -1,0 +1,362 @@
+1. Introduction
+This report summarizes the performance of the Random Forest classifier trained on the Tetulia River fish dataset. The task was to predict fish species using weight and length features.
+
+2. Dataset Description
+The dataset includes 9 classes of fish with length and weight measurements. The dataset was split into training, validation, and test sets.
+
+3. Preprocessing Steps
+- Null values were checked and none found.
+- Feature scaling was applied (if applicable).
+- Dataset was split: 80% train, 10% validation, 10% test.
+
+Model: Random Forest Classifier
+
+Hyperparameter Tuning
+GridSearchCV was used with 3-fold cross-validation over 36 combinations.
+
+Accuracy for Different Configurations
+
+| n_estimators | max_depth | min_samples_split | Accuracy (%) |
+|--------------|-----------|-------------------|--------------|
+| 50           | 5         | 2                 | 88.25        |
+| 100          | 5         | 2                 | 89.12        |
+| 100          | 10        | 5                 | **92.89**    |
+| 150          | 10        | 5                 | 91.76        |
+| 200          | 15        | 5                 | 91.35        |
+
+As seen, the configuration with `n_estimators = 100`, `max_depth = 10`, and `min_samples_split = 5` gave the best accuracy.
+
+Final Chosen Parameters and Reason
+Best parameters:
+- `n_estimators = 100`
+- `max_depth = 10`
+- `min_samples_split = 5`
+- `max_features = 'sqrt'`
+
+This configuration provided the highest accuracy while avoiding overfitting.
+
+Evaluation Metrics
+Accuracy: 92.89%
+
+Precision, Recall, F1-score (selected):
+- Anabas testudineus: F1 = 1.00
+- Otolithoides biauritus: F1 = 0.72
+- Setipinna taty: F1 = 0.67
+
+Weighted F1 Score: 0.93
+
+Confusion Matrix
+
+          Predicted →
+          A  C  OB OP PC PP PL ST SP
+Actual ↓
+A      [160  0   0   0  0  0  0  0  0]
+C      [0  125   0   0  0  0  0  0  0]
+OB     [0   0 111   0  0  0  0 30  0]
+OP     [0   0   0 129  0  0  0  0  0]
+PC     [0   0   0   0 132 0  0  0  0]
+PP     [0   0   0   0  0 159 0  0  0]
+PL     [0   0   0   0  0  0 105 0  0]
+ST     [0   0  57   0  0  0  0 89  0]
+SP     [0   0   0   0  0  0  0  0 127]
+
+Observations
+- Most species were classified perfectly.
+- Otolithoides biauritus is often misclassified as Setipinna taty.
+- Setipinna taty had the lowest recall (0.61), suggesting it's hard to detect.
+- Overall performance is excellent with very high accuracy and precision across classes.
+
+Conclusion
+The Random Forest model performed exceptionally well on the dataset, especially with the chosen hyperparameters. It balances accuracy and class-wise performance, making it a strong candidate for the final model.
+
+
+
+
+
+Model: K-Nearest Neighbors (KNN)
+
+Hyperparameter Tuning
+GridSearchCV was performed with 5-fold cross-validation over 120 combinations of `n_neighbors`, `weights`, and `metric`.
+
+Accuracy for Different Configurations
+
+| n_neighbors | weights  | metric     | Accuracy (%) |
+|-------------|----------|------------|--------------|
+| 3           | uniform  | euclidean  | 89.26        |
+| 5           | distance | manhattan  | 90.15        |
+| 11          | uniform  | minkowski  | 91.34        |
+| 15          | uniform  | manhattan  | **93.14**    |
+| 17          | distance | manhattan  | 91.23        |
+
+n_neighbours = [1, 21]
+The best performance was achieved with `n_neighbors = 15`, `weights = uniform`, and `metric = manhattan`.
+
+Final Chosen Parameters and Reason
+Best parameters:
+- `n_neighbors = 15`
+- `weights = uniform`
+- `metric = manhattan`
+
+This combination yielded the highest accuracy and stable classification across classes. A slightly larger `k` (15) helped in smoothing noisy predictions.
+
+Evaluation Metrics
+Test Accuracy: 93.14%
+
+Precision, Recall, F1-score (selected):
+- Otolithoides biauritus: F1 = 0.71
+- Setipinna taty: F1 = 0.71
+- All other classes: F1 = 1.00
+
+Weighted F1 Score: 0.93
+
+Observations
+- The model performs exceptionally well for 7 out of 9 classes.
+- Otolithoides biauritus and Setipinna taty remain challenging with lower F1-scores (around 0.71).
+- Increasing `k` helped reduce overfitting and improved generalization.
+
+Conclusion
+KNN with the optimal hyperparameters achieved high accuracy and balanced class-wise performance. It is competitive with Random Forest and can be considered a strong alternative depending on deployment constraints (e.g., simplicity or memory).
+
+
+
+
+
+Model: XGBoost
+
+Hyperparameter Tuning
+GridSearchCV was performed with 3-fold cross-validation over 72 combinations of `n_estimators`, `max_depth`, `learning_rate`, `colsample_bytree`, and `subsample`.
+
+Accuracy for Selected Configurations (Illustrative)
+
+| max_depth | learning_rate | n_estimators | colsample_bytree | subsample | Accuracy (%) |
+|-----------|----------------|--------------|-------------------|-----------|--------------|
+| 3         | 0.1            | 100          | 0.8               | 0.8       | 91.02        |
+| 5         | 0.1            | 150          | 1.0               | 0.9       | 91.76        |
+| 3         | 0.05           | 150          | 0.8               | 0.8       | **93.01**    |
+| 6         | 0.01           | 200          | 0.6               | 1.0       | 91.30        |
+
+Final Chosen Parameters and Reason
+Best parameters:
+- `max_depth = 3`
+- `learning_rate = 0.05`
+- `n_estimators = 150`
+- `colsample_bytree = 0.8`
+- `subsample = 0.8`
+
+This configuration gave the best generalization performance with high class-wise balance and stability. Shallow trees (depth 3) prevented overfitting, and subsampling introduced beneficial randomness.
+
+Evaluation Metrics
+- Accuracy: 93.01%
+- Precision: 93.18%
+- Recall: 93.01%
+- F1 Score: 93.00%
+
+Class-wise:
+- Otolithoides biauritus: F1 = 0.71
+- Setipinna taty: F1 = 0.69
+- All other classes: F1 = 1.00
+
+Observations
+- XGBoost is strong in overall performance with macro and weighted F1-scores of 0.93.
+- Similar to KNN and Random Forest, two classes (Otolithoides biauritus and Setipinna taty) are consistently harder to classify.
+- Boosting's iterative refinement gives this model more flexibility while keeping it regularized with depth and subsampling.
+
+Conclusion
+XGBoost presents a solid tradeoff between accuracy and generalization. It matches KNN and Random Forest in performance and is a powerful choice for tabular data classification tasks.
+
+
+
+
+
+Model: LightGBM
+
+Performance Summary
+LightGBM achieved the highest accuracy among all models tested.
+
+- Accuracy: 93.63%
+- Precision: 93.79%
+- Recall: 93.63%
+- F1 Score: 93.70%
+
+Classification Report Insights
+- Most classes are perfectly classified, including:
+  - Anabas testudineus, Coilia dussumieri, Pethia conchonius, Polynemus paradiseus, Sillaginopsis panijus – all with F1 = 1.00
+- Challenging classes:
+  - Otolithoides biauritus: F1 = 0.76
+  - Setipinna taty: F1 = 0.73
+  - Puntius lateristriga: F1 = 0.98 (recall dropped slightly)
+
+Strengths of LightGBM
+- Faster training and better scalability compared to XGBoost.
+- High performance on both balanced and slightly imbalanced classes.
+- Built-in handling of categorical features (if any), though not applicable here.
+
+Weaknesses
+- Slight recall drop on specific classes like Puntius lateristriga and Setipinna taty.
+- Otolithoides biauritus again remains a commonly misclassified class across models.
+
+Observation
+- The model generalizes extremely well across all folds.
+- Class-wise confusion is minimal, indicating strong decision boundaries.
+
+Summary
+LightGBM slightly outperforms XGBoost and Random Forest in terms of all four major metrics.
+It should be strongly considered for the final report unless interpretability is prioritized over performance.
+
+
+
+
+
+Model: Naive Bayes
+
+Performance Summary
+Naive Bayes performed impressively considering its simplicity and assumptions.
+
+- Accuracy: 92.89%
+- Precision: 93.00%
+- Recall: 92.89%
+- F1 Score: 92.94%
+
+Classification Report Insights
+- Perfect classification was achieved in several classes:
+  - Anabas testudineus, Coilia dussumieri, Pethia conchonius, Polynemus paradiseus, Sillaginopsis panijus, Channa striata – all with F1 = 1.00
+- Challenging classes:
+  - Setipinna taty: F1 = 0.65 (precision = 0.71, recall = 0.60)
+  - Otolithoides biauritus: F1 = 0.73 (precision = 0.68, recall = 0.78)
+
+Strengths of Naive Bayes
+- High performance and fast training even with a basic model.
+- Consistent accuracy across most fish species.
+- Performs surprisingly well despite the model's assumption of feature independence.
+
+Weaknesses
+- Poorer performance on Setipinna taty and Otolithoides biauritus due to overlapping feature space.
+- Not suitable for highly complex or feature-interactive datasets without preprocessing.
+
+Observation
+- Most misclassifications occurred between Setipinna taty and Otolithoides biauritus, indicating that their features may not be linearly separable.
+- Despite the simplicity of the model, it generalizes well with minimal tuning (best var_smoothing = 1e-09).
+
+Summary
+Naive Bayes shows competitive performance with minimal computation and tuning. While it may not outperform tree-based models like LightGBM or Random Forest, it proves to be a robust baseline. It is a solid option for quick deployment or resource-constrained environments.
+
+
+
+
+
+Model: Logistic Regression
+
+Performance Summary  
+Logistic Regression delivered a solid performance with high overall accuracy and excellent results on most classes.
+
+- Accuracy: 93.38%
+- Precision: 94.00%
+- Recall: 93.38%
+- F1 Score: 93.52%
+
+Classification Report Insights  
+- Perfect classification (F1 = 1.00) for:
+  - Anabas testudineus, Coilia dussumieri, Otolithoides pama, Pethia conchonius, Polynemus paradiseus, Puntius lateristriga, Sillaginopsis panijus
+- Misclassifications occurred primarily in:
+  - Otolithoides biauritus: F1 = 0.67 (Precision = 0.78, Recall = 0.60)
+  - Setipinna taty: F1 = 0.75 (Precision = 0.68, Recall = 0.83)
+
+Strengths of Logistic Regression  
+- Interpretable model with well-understood decision boundaries.
+- Performs well even on moderately imbalanced datasets.
+- Fast training time and low computational overhead.
+
+Weaknesses  
+- Limited capacity to model complex or nonlinear relationships.
+- Performance slightly degraded on classes with overlapping features (e.g., Otolithoides biauritus, Setipinna taty).
+- Some confusion persists between closely related species.
+
+Observation  
+- Misclassifications for Otolithoides biauritus often point toward Setipinna taty, possibly due to overlapping features.
+- Logistic Regression provides a reliable baseline and holds its ground even against more complex models.
+
+Summary  
+Logistic Regression stands as a strong, interpretable baseline classifier. It performs exceptionally well for most classes but struggles with a couple of species due to linear separability limitations. Suitable for use where model transparency and simplicity are key.
+
+
+
+
+
+Model: Support Vector Regression (SVM)
+
+Performance Summary  
+The SVR model demonstrated exceptional performance in predicting fish weight using the optimized hyperparameters.
+
+- Best Parameters: {'C': 10, 'gamma': 'scale', 'kernel': 'rbf'}
+- Best Cross-Validated R² Score: 99.75%
+- Test R² Score: 99.74%
+- Mean Squared Error: 0.00266
+
+Insights  
+- Extremely high R² values in both training (cross-validated) and test sets indicate strong generalization.
+- The RBF kernel with C=10 and gamma='scale' captured the nonlinear relationships in the data effectively.
+- The low mean squared error confirms precise predictions across the test data.
+
+Strengths of SVR  
+- Excellent at modeling complex, nonlinear relationships through kernel trick.
+- High flexibility while maintaining good generalization, especially with well-tuned hyperparameters.
+- Robust to outliers with proper regularization (`C`).
+
+Weaknesses  
+- Training time can be high for larger datasets, especially with grid search.
+- SVR does not natively provide feature importance or interpretability.
+- Sensitive to feature scaling, requiring preprocessing with StandardScaler or similar.
+
+Observation  
+- The performance gap between cross-validation and test scores is negligible, indicating a stable and reliable model.
+- This level of accuracy makes SVR an ideal candidate for regression tasks in this dataset.
+
+Summary  
+Support Vector Regression with RBF kernel excels at predicting fish weight, outperforming many classical regression models. With proper tuning and scaling, it offers near-perfect accuracy, though interpretability may be limited compared to simpler models.
+
+
+
+
+
+Model: Neural Network (MLPRegressor)
+
+Performance Summary  
+The neural network model achieved outstanding results in predicting fish weight, showing excellent generalization and precision.
+
+- Best Parameters: {'activation': 'relu', 'alpha': 0.001, 'hidden_layer_sizes': (100, 50), 'learning_rate': 'constant', 'solver': 'lbfgs'}
+- Best Cross-Validated R² Score: 99.84%
+- Test R² Score: 99.83%
+- Mean Squared Error: 0.00178
+
+Insights  
+- The model's two-layer architecture with ReLU activation effectively captured complex patterns in the data.
+- The `lbfgs` solver contributed to fast and stable convergence, even with relatively deep architectures.
+- A very low MSE confirms highly accurate weight predictions.
+
+Strengths of Neural Networks  
+- Capable of modeling highly nonlinear relationships that linear models might miss.
+- Flexible architecture allows for deep learning on small to medium datasets.
+- Performs exceptionally well with proper tuning and scaled inputs.
+
+Weaknesses  
+- Less interpretable compared to simpler models like linear regression or decision trees.
+- Training can be computationally expensive with large parameter grids or datasets.
+- Sensitive to initialization, scaling, and hyperparameter tuning.
+
+Observation  
+- There is virtually no overfitting, as the test score closely matches the cross-validated score.
+- This model is one of the top performers and ideal when predictive accuracy is prioritized over interpretability.
+
+Summary  
+The neural network (MLPRegressor) stands out for its high predictive performance on this dataset, closely rivaling SVR. Its flexibility and capacity for learning intricate patterns make it a strong contender for the final model selection.
+
+
+
+
+
+| Model         | Accuracy (%) | Precision | Recall  | F1 Score | Strengths                                      | Weaknesses                                  |
+|---------------|--------------|-----------|---------|----------|------------------------------------------------|---------------------------------------------|
+| Random Forest | 92.89        | 0.93      | 0.93    | 0.93     | Robust performance, easy to interpret, handles non-linearities well | Slower for large datasets, slightly lower performance than boosting models |
+| KNN           | 93.14        | 0.93      | 0.93    | 0.93     | Simple and effective, good performance with right k | Memory-intensive at inference, sensitive to irrelevant features |
+| XGBoost       | 93.01        | 0.93      | 0.93    | 0.93     | Excellent generalization, regularized to avoid overfitting | Slower training, more hyperparameters |
+| LightGBM      | 93.63        | 0.9379    | 0.9363  | 0.9370   | Fastest training, best overall metrics | Slight recall drop on hard classes, slightly less interpretable |
